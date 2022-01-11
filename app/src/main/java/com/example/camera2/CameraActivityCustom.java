@@ -57,6 +57,9 @@ public class CameraActivityCustom extends AppCompatActivity {
         ORIENTATIONS.append(Surface.ROTATION_270, 180);
     }
 
+    int height = 640;
+    int width = 480;
+
     private String cameraId;
     protected CameraDevice cameraDevice;
     protected CameraCaptureSession cameraCaptureSessions;
@@ -125,6 +128,25 @@ public class CameraActivityCustom extends AppCompatActivity {
 
         @Override
         public void onError(CameraDevice camera, int error) {
+            switch(error) {
+                case 1:
+                    Toast.makeText(CameraActivityCustom.this, "camera device is in use already.", Toast.LENGTH_SHORT).show();
+                    break;
+                case 2:
+                    Toast.makeText(CameraActivityCustom.this, "camera device could not be opened because there are too many other open camera devices.", Toast.LENGTH_SHORT).show();
+                    break;
+                case 3:
+                    Toast.makeText(CameraActivityCustom.this, "camera device could not be opened due to a device policy.", Toast.LENGTH_SHORT).show();
+                    break;
+                case 4:
+                    Toast.makeText(CameraActivityCustom.this, " camera device has encountered a fatal error.\n" +
+                            "\n" +
+                            "The camera device needs to be re-opened to be used again.", Toast.LENGTH_SHORT).show();
+                    break;
+                case 5:
+                    Toast.makeText(CameraActivityCustom.this, "camera service has encountered a fatal error.\n Android device may need to be shut down and restarted to restore camera function.", Toast.LENGTH_SHORT).show();
+                    break;
+            }
             cameraDevice.close();
             cameraDevice = null;
         }
@@ -193,12 +215,12 @@ public class CameraActivityCustom extends AppCompatActivity {
             if (characteristics != null) {
                 jpegSizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG);
             }
-            int width = 640;
-            int height = 480;
-            if (jpegSizes != null && 0 < jpegSizes.length) {
-                width = jpegSizes[0].getWidth();
-                height = jpegSizes[0].getHeight();
-            }
+//            int width = 640;
+//            int height = 480;
+//            if (jpegSizes != null && 0 < jpegSizes.length) {
+//                width = jpegSizes[0].getWidth();
+//                height = jpegSizes[0].getHeight();
+//            }
             ImageReader reader = ImageReader.newInstance(width, height, ImageFormat.JPEG, 1);
             List<Surface> outputSurfaces = new ArrayList<Surface>(2);
             outputSurfaces.add(reader.getSurface());
@@ -264,6 +286,7 @@ public class CameraActivityCustom extends AppCompatActivity {
 
                 @Override
                 public void onConfigureFailed(CameraCaptureSession session) {
+                    Toast.makeText(CameraActivityCustom.this, "error Configure", Toast.LENGTH_SHORT).show();
                 }
             }, mBackgroundHandler);
         } catch (CameraAccessException e) {
