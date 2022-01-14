@@ -19,24 +19,29 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_margin="5dp">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/imgView"/>
 
+        </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:orientation="vertical">
 
-            <Switch
-                android:id="@+id/startstoppreview"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Start Preview" />
-
             <Button
                 android:id="@+id/getpicture"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Open Camera" />
+
+
         </LinearLayout>
     </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

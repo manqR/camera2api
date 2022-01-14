@@ -3,9 +3,13 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/mobile/Camera2/app/src/main/res/layout/activity_android_camera_api.xml" value="0.12708333333333333" />
-        <entry key="..\:/mobile/Camera2/app/src/main/res/layout/activity_main.xml" value="0.25" />
+        <entry key="..\:/mobile/Camera2/app/src/main/res/drawable/ic_baseline_cameraswitch_24.xml" value="0.26614583333333336" />
+        <entry key="..\:/mobile/Camera2/app/src/main/res/layout/activity2_camera.xml" value="0.13125" />
+        <entry key="..\:/mobile/Camera2/app/src/main/res/layout/activity_android_camera_api.xml" value="0.2" />
+        <entry key="..\:/mobile/Camera2/app/src/main/res/layout/activity_camera.xml" value="0.1265625" />
+        <entry key="..\:/mobile/Camera2/app/src/main/res/layout/activity_main.xml" value="0.2" />
         <entry key="..\:/mobile/Camera2/app/src/main/res/layout/content_main.xml" value="0.25" />
+        <entry key="..\:/mobile/Camera2/app/src/main/res/layout/fragment_camera2_basic.xml" value="0.12552083333333333" />
         <entry key="..\:/mobile/Camera2/app/src/main/res/layout/fragment_first.xml" value="0.25" />
       </map>
     </option>

@@ -1,7 +1,10 @@
 package com.example.camera2;
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.RectF;
@@ -28,12 +31,14 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -60,18 +65,28 @@ public class CameraActivityCustom extends AppCompatActivity {
     int height = 640;
     int width = 480;
 
-    private String cameraId;
+    Bitmap bmp;
+    String cameraOpt;
+    String optCmr = "1";
+    boolean takeCapt = false;
+
+
     protected CameraDevice cameraDevice;
     protected CameraCaptureSession cameraCaptureSessions;
     protected CaptureRequest captureRequest;
     protected CaptureRequest.Builder captureRequestBuilder;
     private Size imageDimension;
     private ImageReader imageReader;
-    private File file;
     private static final int REQUEST_CAMERA_PERMISSION = 200;
-    private boolean mFlashSupported;
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread;
+
+    public static final String CAMERA_FRONT = "1";
+    public static final String CAMERA_BACK = "0";
+
+    private String cameraId = CAMERA_BACK;
+    ImageView switchCamera;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +96,16 @@ public class CameraActivityCustom extends AppCompatActivity {
         assert textureView != null;
         textureView.setSurfaceTextureListener(textureListener);
         takePictureButton = (Button) findViewById(R.id.btn_takepicture);
+
+        switchCamera = (ImageView) findViewById(R.id.switchCamera);
+
+        switchCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                switchCamera();
+            }
+        });
+
         assert takePictureButton != null;
         takePictureButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -88,7 +113,36 @@ public class CameraActivityCustom extends AppCompatActivity {
                 takePicture();
             }
         });
+
+        Intent intent = getIntent();
+        cameraOpt = intent.getStringExtra("key"); //front or back
+        optCmr = intent.getStringExtra("camera"); //camera1 or camera2
+
     }
+
+
+    public void switchCamera() {
+        if (cameraId.equals(CAMERA_FRONT)) {
+            cameraId = CAMERA_BACK;
+            closeCamera();
+            reopenCamera();
+
+        } else if (cameraId.equals(CAMERA_BACK)) {
+            cameraId = CAMERA_FRONT;
+            closeCamera();
+            reopenCamera();
+        }
+    }
+
+    public void reopenCamera() {
+        if (textureView.isAvailable()) {
+            openCamera();
+            transformImage(textureView.getWidth(), textureView.getHeight());
+        } else {
+            textureView.setSurfaceTextureListener(textureListener);
+        }
+    }
+
 
     TextureView.SurfaceTextureListener textureListener = new TextureView.SurfaceTextureListener() {
         @Override
@@ -128,12 +182,20 @@ public class CameraActivityCustom extends AppCompatActivity {
 
         @Override
         public void onError(CameraDevice camera, int error) {
+
+            camera.close();
+//            cameraDevice = camera;
+//            cameraDevice.close();
+//            cameraDevice = null;
+//            reopenCamera();
+
             switch(error) {
                 case 1:
                     Toast.makeText(CameraActivityCustom.this, "camera device is in use already.", Toast.LENGTH_SHORT).show();
                     break;
                 case 2:
-                    Toast.makeText(CameraActivityCustom.this, "camera device could not be opened because there are too many other open camera devices.", Toast.LENGTH_SHORT).show();
+                     switchCamera();
+//                    Toast.makeText(CameraActivityCustom.this, "camera device could not be opened because there are too many other open camera devices.", Toast.LENGTH_SHORT).show();
                     break;
                 case 3:
                     Toast.makeText(CameraActivityCustom.this, "camera device could not be opened due to a device policy.", Toast.LENGTH_SHORT).show();
@@ -147,15 +209,14 @@ public class CameraActivityCustom extends AppCompatActivity {
                     Toast.makeText(CameraActivityCustom.this, "camera service has encountered a fatal error.\n Android device may need to be shut down and restarted to restore camera function.", Toast.LENGTH_SHORT).show();
                     break;
             }
-            cameraDevice.close();
-            cameraDevice = null;
+
+
         }
     };
     final CameraCaptureSession.CaptureCallback captureCallbackListener = new CameraCaptureSession.CaptureCallback() {
         @Override
         public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
             super.onCaptureCompleted(session, request, result);
-            Toast.makeText(CameraActivityCustom.this, "Saved:" + file, Toast.LENGTH_SHORT).show();
             createCameraPreview();
         }
     };
@@ -231,7 +292,6 @@ public class CameraActivityCustom extends AppCompatActivity {
             // Orientation
             int rotation = getWindowManager().getDefaultDisplay().getRotation();
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(rotation));
-            final File file = new File(Environment.getExternalStorageDirectory() + "/pic.jpg");
             ImageReader.OnImageAvailableListener readerListener = new ImageReader.OnImageAvailableListener() {
                 @Override
                 public void onImageAvailable(ImageReader reader) {
@@ -256,12 +316,12 @@ public class CameraActivityCustom extends AppCompatActivity {
                 private void save(byte[] bytes) throws IOException {
                     OutputStream output = null;
                     try {
-                        output = new FileOutputStream(file);
-                        output.write(bytes);
-                    } finally {
-                        if (null != output) {
-                            output.close();
-                        }
+                        Bitmap btImage = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                        bmp = Bitmap.createScaledBitmap(btImage, 1024, 768, true);
+                        setResult(bmp);
+
+                    }catch (Exception e){
+                        e.printStackTrace();
                     }
                 }
             };
@@ -270,11 +330,11 @@ public class CameraActivityCustom extends AppCompatActivity {
                 @Override
                 public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
                     super.onCaptureCompleted(session, request, result);
-                    Toast.makeText(CameraActivityCustom.this, "Saved:" + file, Toast.LENGTH_SHORT).show();
                     createCameraPreview();
                 }
             };
             cameraDevice.createCaptureSession(outputSurfaces, new CameraCaptureSession.StateCallback() {
+
                 @Override
                 public void onConfigured(CameraCaptureSession session) {
                     try {
@@ -328,7 +388,7 @@ public class CameraActivityCustom extends AppCompatActivity {
         CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         Log.e(TAG, "is camera open");
         try {
-            cameraId = manager.getCameraIdList()[1];
+
             CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
             StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
             assert map != null;
@@ -399,5 +459,20 @@ public class CameraActivityCustom extends AppCompatActivity {
         //closeCamera();
         stopBackgroundThread();
         super.onPause();
+    }
+
+
+    public void setResult(Bitmap bmp1){
+        Intent data = new Intent();
+        data.putExtra("bmp",ImageViewtobeByte(bmp1));
+        data.putExtra("camera",optCmr);
+        setResult(RESULT_OK,data);
+        finish();
+    }
+
+    private byte[] ImageViewtobeByte(Bitmap bitmap) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG,40,stream);
+        return stream.toByteArray();
     }
 }

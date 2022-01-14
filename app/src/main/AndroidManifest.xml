@@ -28,6 +28,18 @@
             android:screenOrientation="landscape"
             android:theme="@style/Theme.Camera2.NoActionBar">
         </activity>
+        <activity
+            android:name=".CameraActivity"
+            android:windowSoftInputMode="adjustPan|stateAlwaysHidden"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.Camera2.NoActionBar">
+        </activity>
+        <activity
+            android:name=".Camera2Activity"
+            android:windowSoftInputMode="adjustPan|stateAlwaysHidden"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.Camera2.NoActionBar">
+        </activity>
     </application>
 
 </manifest>
