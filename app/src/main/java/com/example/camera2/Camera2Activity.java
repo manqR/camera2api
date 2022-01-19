@@ -616,13 +616,30 @@ public class Camera2Activity extends AppCompatActivity
     }
 
 
+
     private void takePicture() {
 
-        if (mCameraId.equals(CAMERA_FRONT)) {
-            captureStillPicture();
-        } else if (mCameraId.equals(CAMERA_BACK)) {
-            lockFocus();
-        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mCameraId.equals(CAMERA_FRONT)) {
+                            captureStillPicture();
+                        } else if (mCameraId.equals(CAMERA_BACK)) {
+                            lockFocus();
+                        }
+                        Toast.makeText(Camera2Activity.this, "Capture", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        }).start();
 
     }
 
@@ -685,7 +702,12 @@ public class Camera2Activity extends AppCompatActivity
                 public void onCaptureCompleted(@NonNull CameraCaptureSession session,
                                                @NonNull CaptureRequest request,
                                                @NonNull TotalCaptureResult result) {
-                    unlockFocus();
+                    try {
+                        unlockFocus();
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
+
                 }
             };
 
