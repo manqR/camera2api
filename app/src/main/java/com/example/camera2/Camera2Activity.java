@@ -28,6 +28,7 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
+import android.media.MediaActionSound;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -630,12 +631,13 @@ public class Camera2Activity extends AppCompatActivity
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        MediaActionSound mediaActionSound = new MediaActionSound();
+                        mediaActionSound.play(MediaActionSound.SHUTTER_CLICK);
                         if (mCameraId.equals(CAMERA_FRONT)) {
                             captureStillPicture();
                         } else if (mCameraId.equals(CAMERA_BACK)) {
                             lockFocus();
                         }
-                        Toast.makeText(Camera2Activity.this, "Capture", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
